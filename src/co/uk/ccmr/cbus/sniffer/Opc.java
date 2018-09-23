@@ -329,6 +329,10 @@ public enum Opc {
 			new ParamNameAndLen("NN", 2)}),
 	NNREL(0x51, new ParamNameAndLen[] {
 			new ParamNameAndLen("NN", 2)}),
+	NNRSM(0x4F, new ParamNameAndLen[] {
+			new ParamNameAndLen("NN", 2)}),
+	NNRST(0x5E, new ParamNameAndLen[] {
+			new ParamNameAndLen("NN", 2)}),
 	NNULN(0x54, new ParamNameAndLen[] {
 			new ParamNameAndLen("NN", 2)}),
 	NUMEV(0x74, new ParamNameAndLen[] {

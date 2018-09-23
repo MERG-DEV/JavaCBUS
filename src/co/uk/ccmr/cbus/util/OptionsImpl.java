@@ -82,7 +82,7 @@ public class OptionsImpl implements Options {
 			StyleContext sc = StyleContext.getDefaultStyleContext();
 	    	AttributeSet redAset = sc.addAttribute(SimpleAttributeSet.EMPTY,
 	    	                                        StyleConstants.Foreground, Color.RED);
-			if (log != null) log.insertString(log.getLength(), "Using properties:"+propertyFilename+"\n", redAset);
+			if (log != null) log.insertString(0, "Using properties:"+propertyFilename+"\n", redAset);
 		} catch (BadLocationException e) {
 			e.printStackTrace();
 		}

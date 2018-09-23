@@ -99,10 +99,10 @@ public class WriterThread extends TerminatingThread {
 		System.out.println("Writer thread running serialport="+serialPort);
 		try {
 			if (serialPort != null) {
-				if (log != null) log.insertString(log.getLength(), "WRITING to "+serialPort.getSystemPortName()+"\n", redAset);
+				if (log != null) log.insertString(0, "WRITING to "+serialPort.getSystemPortName()+"\n", redAset);
 				System.out.println("WRITING to "+serialPort.getSystemPortName());
 			} else {
-				if (log != null) log.insertString(log.getLength(), "WRITING to nowhere\n", redAset);
+				if (log != null) log.insertString(0, "WRITING to nowhere\n", redAset);
 				System.out.println("WRITING to nowhere");
 			}
 		} catch (BadLocationException e2) {
@@ -118,8 +118,8 @@ public class WriterThread extends TerminatingThread {
 				if (serialPort == null) {
 					// not connected
 					try {
-						if (log != null) log.insertString(log.getLength(), "> "+ce.toString()+"\n", yellowAset);
-						if (log != null) log.insertString(log.getLength(), "> "+ce.dump(options.getBase())+"\n", yellowAset);
+						if (log != null) log.insertString(0, "> "+ce.toString()+"\n", yellowAset);
+						if (log != null) log.insertString(0, "> "+ce.dump(options.getBase())+"\n", yellowAset);
 						
 					} catch (BadLocationException e) {
 						e.printStackTrace();
@@ -127,8 +127,8 @@ public class WriterThread extends TerminatingThread {
 				} else {
 					// connected
 					try {
-						if (log != null) log.insertString(log.getLength(), "> "+ce.toString()+"\n", null);
-						if (log != null) log.insertString(log.getLength(), "> "+ce.dump(options.getBase())+"\n", null);
+						if (log != null) log.insertString(0, "> "+ce.toString()+"\n", null);
+						if (log != null) log.insertString(0, "> "+ce.dump(options.getBase())+"\n", null);
 						
 					} catch (BadLocationException e) {
 						e.printStackTrace();
@@ -136,6 +136,7 @@ public class WriterThread extends TerminatingThread {
 					byte[] bytes = ce.toString().getBytes();
 					serialPort.writeBytes(bytes, bytes.length);
 				}
+				sleep(20);
 			} catch (Exception e) {
 				if (! (e instanceof InterruptedException)) {
 					e.printStackTrace();
@@ -148,7 +149,7 @@ public class WriterThread extends TerminatingThread {
 		terminate = true;
 		if (serialPort != null) {
 			try {
-				if (log != null) log.insertString(log.getLength(), "TERMINATED WRITING to "+serialPort.getSystemPortName()+"\n", redAset);
+				if (log != null) log.insertString(0, "TERMINATED WRITING to "+serialPort.getSystemPortName()+"\n", redAset);
 			} catch (BadLocationException e2) {
 				e2.printStackTrace();
 			}

@@ -144,7 +144,7 @@ public class JsscSerialCbusDriver implements SerialPortEventListener, CbusDriver
 			writer = null;
 		}
 		try {
-			if (log != null) log.insertString(log.getLength(), "Opening port "+portName+"\n", redAset);
+			if (log != null) log.insertString(0, "Opening port "+portName+"\n", redAset);
 		} catch (BadLocationException e2) {
 			e2.printStackTrace();
 		}
@@ -239,7 +239,7 @@ public class JsscSerialCbusDriver implements SerialPortEventListener, CbusDriver
     public void serialEvent(SerialPortEvent event) {
         String err = "EVENT:"+eventTypeToString(event.getEventType())+" Value="+event.getEventValue();
         try {
-        	if (log != null) log.insertString(log.getLength(), "> "+err+"\n", redAset);
+        	if (log != null) log.insertString(0, "> "+err+"\n", redAset);
 		} catch (BadLocationException e) {
 			e.printStackTrace();
 		}

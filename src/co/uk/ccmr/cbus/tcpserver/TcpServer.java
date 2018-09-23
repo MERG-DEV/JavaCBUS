@@ -142,6 +142,7 @@ public class TcpServer implements Runnable, CbusReceiveListener {
 	 */
 	@Override
 	public void receiveString(String input) {
+		System.out.println("TcpServer - got a message from CAN:"+input);
 		List<Socket> toRemove = new ArrayList<Socket>();
 		for (Socket s : clients) {
 			try {

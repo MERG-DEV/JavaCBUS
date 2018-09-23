@@ -119,7 +119,7 @@ public class FazecastSerialCbusDriver implements CbusDriver {
 	 * @param portName the name of the port to connect to
 	 * @throws CbusDriverException if the port cannot be opened
 	 */
-	public void connect(String portName) throws CbusDriverException {
+	public void connect(String name) throws CbusDriverException {
 		
 		if (serialPort != null) {
 			serialPort.closePort();
@@ -137,11 +137,12 @@ public class FazecastSerialCbusDriver implements CbusDriver {
 			writer = null;
 		}
 		try {
-			if (log != null) log.insertString(log.getLength(), "Opening port "+portName+"\n", redAset);
+			if (log != null) log.insertString(0, "Opening port "+name+"\n", redAset);
 		} catch (BadLocationException e2) {
 			e2.printStackTrace();
 		}
-		serialPort = SerialPort.getCommPort(portName);	
+		System.out.println("CONNECT="+name);
+		serialPort = SerialPort.getCommPort(name);	
 
 		if (! serialPort.openPort()) {
 			System.out.println("Failed to open port");

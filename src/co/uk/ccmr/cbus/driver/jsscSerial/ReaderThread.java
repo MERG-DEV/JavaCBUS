@@ -97,9 +97,9 @@ public class ReaderThread extends TerminatingThread {
     	try {
 
 			if (serialPort != null) {
-				if (log != null) log.insertString(log.getLength(), "READING from "+serialPort.getPortName()+"\n", redAset);
+				if (log != null) log.insertString(0, "READING from "+serialPort.getPortName()+"\n", redAset);
 			} else {
-				if (log != null) log.insertString(log.getLength(), "READING from nowhere\n", redAset);
+				if (log != null) log.insertString(0, "READING from nowhere\n", redAset);
 				System.out.println("SerialPort.ReaderThread terminating serialport="+serialPort);
 				return;
 			}
@@ -148,7 +148,7 @@ public class ReaderThread extends TerminatingThread {
 		driver.setCommsState(CbusCommsState.DISCONNECTED);
 		if (serialPort != null) {
 			try {
-				if (log != null) log.insertString(log.getLength(), "TERMINATED READING from "+serialPort.getPortName()+"\n", redAset);
+				if (log != null) log.insertString(0, "TERMINATED READING from "+serialPort.getPortName()+"\n", redAset);
 			} catch (BadLocationException e2) {
 				e2.printStackTrace();
 			}

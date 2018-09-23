@@ -105,12 +105,20 @@ public class CbusEvent {
 	private MinPri minPri;	// Minor priority
 	/** data for any additional parameters */
 	private int[] data;
+	private boolean extended;
+	private boolean rtr;
+	private int extaddr;
+	private String extdata;
+	private boolean noOpc;
 	
 	/**
 	 * Simple constructor to allow building an event to be built ready to be transmitted.
 	 */
 	public CbusEvent() {
 		data = new int[7];
+		rtr = false;
+		extended = false;
+		noOpc = true;
 	}
 	
 	 /**
@@ -119,32 +127,74 @@ public class CbusEvent {
 	  */
 	public CbusEvent(String cmd) throws InvalidEventException {
 		data = new int[7];
+		opc = Opc.UNKNOWN;
+		int idx = 0;
 		
-		if (cmd.length() < 9) throw new InvalidEventException("Event too short - only "+cmd.length()+" characters");
-		char c = cmd.charAt(0);
+		if (cmd.length() < 7) throw new InvalidEventException("Event too short - only "+cmd.length()+" characters");
+		char c = cmd.charAt(idx);
 		if (c != ':') throw new InvalidEventException("Missing : - got "+c);
-		c = cmd.charAt(1);
-		if (c != 'S') throw new InvalidEventException("Missing S - got "+c);
-		int b1 = Util.getNum(cmd.charAt(2), cmd.charAt(3));
-		setSIDH(b1);
-		b1 = Util.getNum(cmd.charAt(4), cmd.charAt(5));
-		setSIDL(b1);
-		c = cmd.charAt(6);
-		if (c != 'N') throw new InvalidEventException("Missing N - got "+c);
-		b1 = Util.getNum(cmd.charAt(7), cmd.charAt(8));
-		opc = Opc.of(b1);
-		if (opc == null) opc = Opc.UNKNOWN;
-		int pos = 9;
-		try {
-			for (int i=0; i< getLen(); i++) {
-				b1 = Util.getNum(cmd.charAt(pos), cmd.charAt(pos+1));
-				data[i] = b1;
-				pos += 2;
-			}
-		} catch (Exception e) {
-			throw new InvalidEventException(e.getMessage());
+		c = cmd.charAt(++idx);
+		if (c == 'S') {
+			extended = false;
+		} else if (c == 'X') {
+			extended = true;
+		} else {
+			throw new InvalidEventException("Missing S - got "+c);
 		}
-		System.out.println("new CbusEvent data[0]="+data[0]+" data[1]="+data[1]+" data2="+data[2]+" data3="+data[3]);
+		int b1;
+		if (extended) {
+			extaddr = 0;
+			for (int i=0; i<8; i++) {
+				extaddr *= 16;
+				c = cmd.charAt(++idx);
+				if ((c >= '0') && (c <= '9')) {
+					extaddr += (c-'0');
+				} else if ((c >= 'A') && (c <= 'F')) {
+					extaddr += (c-'A'+10);
+				} else if ((c >= 'a') && (c <= 'f')) {
+					extaddr += (c-'a'+10);
+				}
+			}
+		} else {
+			b1 = Util.getNum(cmd.charAt(++idx), cmd.charAt(++idx));
+			setSIDH(b1);
+			b1 = Util.getNum(cmd.charAt(++idx), cmd.charAt(++idx));
+			setSIDL(b1);
+		}
+		c = cmd.charAt(++idx);
+		if (c == 'N') {
+			rtr = false;
+		} else if (c == 'R') {
+			rtr = true;
+		} else {
+			throw new InvalidEventException("Missing N - got "+c+" cmd="+cmd);
+		}
+		if (extended) {
+			extdata = cmd.substring(idx);
+			System.out.println("new CbusEvent with extended data");
+		} else {
+			System.out.println("idx="+idx+"cmd.length="+cmd.length());
+			if (idx+2 < cmd.length()) {	// need 2 bytes for OPC
+				noOpc = false;
+				b1 = Util.getNum(cmd.charAt(++idx), cmd.charAt(++idx));
+				opc = Opc.of(b1);
+				if (opc == null) opc = Opc.UNKNOWN;
+				idx++;
+				try {
+					for (int i=0; i< getLen(); i++) {
+						b1 = Util.getNum(cmd.charAt(idx), cmd.charAt(idx+1));
+						data[i] = b1;
+						idx += 2;
+					}
+				} catch (Exception e) {
+					throw new InvalidEventException(e.getMessage());
+				}
+				System.out.println("new CbusEvent data[0]="+data[0]+" data[1]="+data[1]+" data2="+data[2]+" data3="+data[3]);
+			} else {
+				noOpc = true;
+				System.out.println("new CAN ack");
+			}
+		}
 	}
 	
 	/**
@@ -152,19 +202,37 @@ public class CbusEvent {
 	 */
 	@Override
 	public String toString() {
-		String ret = ":S";
-		ret += Util.byteToHex(getSIDH());
-		ret += Util.byteToHex(getSIDL());
-		ret +=  "N";
-		if (opc == Opc.UNKNOWN) {
-			ret += "??";
+		String ret;
+		if (extended) {
+			ret = ":X";
+			ret += Util.intToHex(extaddr, 8);
 		} else {
-			ret += Util.byteToHex(opc.getValue());
+			ret = ":S";
+			ret += Util.byteToHex(getSIDH());
+			ret += Util.byteToHex(getSIDL());
 		}
-		for (int i=0; i<getLen(); i++) {
-			ret += Util.byteToHex(data[i]);
+		
+		if (rtr) {
+			ret += "R";
+		} else {
+			ret +=  "N";
 		}
-		return ret + ";";
+		if (extended) {
+			ret += extdata;
+		} else {
+			if (! noOpc) {
+				if (opc == Opc.UNKNOWN) {
+					ret += "??";
+				} else {
+					ret += Util.byteToHex(opc.getValue());
+				}
+				for (int i=0; i<getLen(); i++) {
+					ret += Util.byteToHex(data[i]);
+				}
+			}
+			ret += ";";
+		}
+		return ret;
 	}
 
 	/**
@@ -283,6 +351,7 @@ public class CbusEvent {
 	 */
 	public void setOpc(Opc o) {
 		opc = o;
+		noOpc = false;
 	}
 	
 	/**
@@ -337,11 +406,19 @@ public class CbusEvent {
 	 */
 	public String dump(int base) {
 		String ret;
-		if (base == 16) {
-			ret = "MjPri="+mjPri+" MinPri="+minPri + " CAN_ID="+Util.byteToHex(can_id)+" OPC="+opc.toString(base);
-		} else {
-			ret = "MjPri="+mjPri+" MinPri="+minPri + " CAN_ID="+can_id+" OPC="+opc.toString(base);
+		if (rtr) return "RTR";
+		if (extended) {
+			ret = "Address="+Util.intToHex(extaddr, 4);
+			ret += "Data="+extdata;
+			return ret;
 		}
+		if (base == 16) {
+			ret = "MjPri="+mjPri+" MinPri="+minPri + " CAN_ID="+Util.byteToHex(can_id);
+		} else {
+			ret = "MjPri="+mjPri+" MinPri="+minPri + " CAN_ID="+can_id;
+		}
+		if (noOpc) return ret;
+		ret += " OPC="+opc.toString(base);
 
 		int idx = 0;
 		for (ParamNameAndLen p : opc.getParams()) {

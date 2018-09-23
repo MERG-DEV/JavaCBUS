@@ -98,9 +98,9 @@ public class ReaderThread extends TerminatingThread {
     	try {
 
 			if (serialPort != null) {
-				if (log != null) log.insertString(log.getLength(), "READING from "+serialPort.getSystemPortName()+"\n", redAset);
+				if (log != null) log.insertString(0, "READING from "+serialPort.getSystemPortName()+"\n", redAset);
 			} else {
-				if (log != null) log.insertString(log.getLength(), "READING from nowhere\n", redAset);
+				if (log != null) log.insertString(0, "READING from nowhere\n", redAset);
 				System.out.println("SerialPort.ReaderThread terminating serialport="+serialPort);
 				return;
 			}
@@ -112,7 +112,7 @@ public class ReaderThread extends TerminatingThread {
    			int cc = serialPort.readBytes(inb, 1);
    			if (cc != 1){
    				try {
-   					if (log != null) log.insertString(log.getLength(), "Error reading from Serial Port "+serialPort.getSystemPortName()+"\n", redAset);
+   					if (log != null) log.insertString(0, "Error reading from Serial Port "+serialPort.getSystemPortName()+"\n", redAset);
    				} catch (BadLocationException e2) {
    					e2.printStackTrace();
    				}
@@ -129,6 +129,7 @@ public class ReaderThread extends TerminatingThread {
    			}
 				
    			String c = new String(inb);
+   			System.out.println("Fazecast reader:"+c);
    			if (":".equals(c)) {
    				input = "";
    			}
@@ -156,7 +157,7 @@ public class ReaderThread extends TerminatingThread {
 		driver.setCommsState(CbusCommsState.DISCONNECTED);
 		if (serialPort != null) {
 			try {
-				if (log != null) log.insertString(log.getLength(), "TERMINATED READING from "+serialPort.getSystemPortName()+"\n", redAset);
+				if (log != null) log.insertString(0, "TERMINATED READING from "+serialPort.getSystemPortName()+"\n", redAset);
 			} catch (BadLocationException e2) {
 				e2.printStackTrace();
 			}

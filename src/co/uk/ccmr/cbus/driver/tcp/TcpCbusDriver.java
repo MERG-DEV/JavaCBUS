@@ -143,7 +143,7 @@ public class TcpCbusDriver implements CbusDriver {
 			}
 		}
 		try {
-			if (log != null) log.insertString(log.getLength(), "Opening port "+portName+"\n", redAset);
+			if (log != null) log.insertString(0, "Opening port "+portName+"\n", redAset);
 		} catch (BadLocationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -173,7 +173,7 @@ public class TcpCbusDriver implements CbusDriver {
 		reader.start();
 		setCbusCommsState(CbusCommsState.CONNECTED);
 		try {
-			if (log != null) log.insertString(log.getLength(), "Connectted to "+portName+"\n", redAset);
+			if (log != null) log.insertString(0, "Connectted to "+portName+"\n", redAset);
 		} catch (BadLocationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -200,7 +200,7 @@ public class TcpCbusDriver implements CbusDriver {
 		}
 		setCbusCommsState(CbusCommsState.DISCONNECTED);
 		try {
-			if (log != null) log.insertString(log.getLength(), "Disconnected TCP client connection\n", redAset);
+			if (log != null) log.insertString(0, "Disconnected TCP client connection\n", redAset);
 		} catch (BadLocationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -239,8 +239,8 @@ public class TcpCbusDriver implements CbusDriver {
 		System.out.println("TCP> "+ce.dump(16));
 		if (getCbusCommsState() != CbusCommsState.CONNECTED) {
 			try {
-				if (log != null) log.insertString(log.getLength(), "> "+ce.toString()+"\n", yellowAset);
-				if (log != null) log.insertString(log.getLength(), "> "+ce.dump(options.getBase())+"\n", yellowAset);
+				if (log != null) log.insertString(0, "> "+ce.toString()+"\n", yellowAset);
+				if (log != null) log.insertString(0, "> "+ce.dump(options.getBase())+"\n", yellowAset);
 			} catch (BadLocationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -249,8 +249,8 @@ public class TcpCbusDriver implements CbusDriver {
 		}
 		try {
 			try {
-				if (log != null) log.insertString(log.getLength(), "> "+ce.toString()+"\n", null);
-				if (log != null) log.insertString(log.getLength(), "> "+ce.dump(options.getBase())+"\n", null);	
+				if (log != null) log.insertString(0, "> "+ce.toString()+"\n", null);
+				if (log != null) log.insertString(0, "> "+ce.dump(options.getBase())+"\n", null);	
 			} catch (BadLocationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

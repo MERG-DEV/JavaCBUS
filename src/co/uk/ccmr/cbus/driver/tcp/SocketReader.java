@@ -100,7 +100,7 @@ public class SocketReader extends Thread  {
 		buffer = new byte[1024];
 
 		try {
-			if (log != null) log.insertString(log.getLength(), "READING from TCP\n", redAset);
+			if (log != null) log.insertString(0, "READING from TCP\n", redAset);
 		} catch (BadLocationException e2) {
 			// TODO Auto-generated catch block
 			e2.printStackTrace();
