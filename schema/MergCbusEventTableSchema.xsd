@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A Schema for MERG CBUS Event Table Session support.                    -->
+<!-- Copyright MERG / Steve Young 2019                                      -->
+<!--                                                                        -->
+<!-- This file provided in the hope that it will be useful, but WITHOUT     -->
+<!-- ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or  -->
+<!-- FITNESS FOR A PARTICULAR PURPOSE.  See the License for more details.   -->
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" >
+        
+    <xs:complexType name="SingleEventType">
+        <xs:sequence>
+            <xs:element name="Name" type="xs:normalizedString" minOccurs="0" maxOccurs="1" />
+            <xs:element name="Comment" type="xs:normalizedString" minOccurs="0" maxOccurs="1" />
+            <xs:element name="LastHeard" type="xs:dateTime" minOccurs="0" maxOccurs="1" />
+            <xs:element name="On" type="xs:unsignedLong" minOccurs="0" maxOccurs="1" />
+            <xs:element name="Off" type="xs:unsignedLong" minOccurs="0" maxOccurs="1" />
+            <xs:element name="In" type="xs:unsignedLong" minOccurs="0" maxOccurs="1" />
+            <xs:element name="Out" type="xs:unsignedLong" minOccurs="0" maxOccurs="1" />
+        </xs:sequence>
+        <xs:attribute name="NodeNum" type="xs:unsignedShort" use="required" />
+        <xs:attribute name="EventNum" type="xs:unsignedShort" use="required" />
+    </xs:complexType>
+    
+    <xs:complexType name="AllEventsType">
+            <xs:sequence>
+                <xs:element name="Event" type="SingleEventType" minOccurs="0" maxOccurs="unbounded" />
+            </xs:sequence>
+    </xs:complexType>
+    
+    <xs:element name="CbusEventDetails" type="AllEventsType">
+        <xs:unique name="UniqueEventNodePairs">
+            <xs:selector xpath="Event"/>
+            <xs:field xpath="@NodeNum"/>
+            <xs:field xpath="@EventNum"/>
+        </xs:unique>
+    </xs:element>
+    
+</xs:schema>
