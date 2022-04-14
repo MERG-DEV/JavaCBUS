@@ -99,10 +99,15 @@ public class OptionsImpl implements Options {
 		}
 		if (args != null) {
 			for (String a : args) {
-				if ("-fb".equals(a)) noFeedback = true;
-				if ("-sync".equals(a)) noSync = true;
-				if ("-det".equals(a)) noDetectors = true;
-				if ("-reconnect".equals(a)) noReconnect = true;
+				if ("-fb".equals(a)) {
+					noFeedback = true;
+				} else if ("-sync".equals(a)) {
+					noSync = true;
+				} else if ("-det".equals(a)) {
+					noDetectors = true;
+				} else if ("-reconnect".equals(a)) {
+					noReconnect = true;
+				} 
 			}
 		}
 	}

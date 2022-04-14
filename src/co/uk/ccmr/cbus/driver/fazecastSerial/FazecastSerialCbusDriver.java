@@ -146,7 +146,7 @@ public class FazecastSerialCbusDriver implements CbusDriver {
 
 		if (! serialPort.openPort()) {
 			System.out.println("Failed to open port");
-			System.exit(1);
+			throw new CbusDriverException("Failed to open port");
 		}
 		// set for blocking
 		serialPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING | SerialPort.TIMEOUT_WRITE_BLOCKING, 0, 0);

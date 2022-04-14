@@ -66,7 +66,7 @@ public interface CbusDriver {
 	 *
 	 * @param portName the name of the port to connect to. The set of allowed names is dependent upon
 	 * the particular concrete implementation
-	 * @throws CbusDriverException if a connection cannot be made or the partname is invalid
+	 * @throws CbusDriverException if a connection cannot be made or the portname is invalid
 	 */
 	public void connect(String portName) throws CbusDriverException;
 	/**
