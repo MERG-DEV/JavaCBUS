@@ -39,15 +39,8 @@
 */
 package co.uk.ccmr.cbus.driver.jsscSerial;
 
-import java.awt.Color;
 import java.util.List;
-
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyleContext;
-import javax.swing.text.StyledDocument;
+import java.util.logging.Logger;
 
 import co.uk.ccmr.cbus.CbusReceiveListener;
 import co.uk.ccmr.cbus.driver.CbusCommsState;
@@ -65,10 +58,10 @@ import jssc.SerialPortException;
  */
 public class ReaderThread extends TerminatingThread {
 	private SerialPort serialPort;
-	private StyledDocument log;
 	private List<CbusReceiveListener> listeners;
-	private AttributeSet redAset;
 	private JsscSerialCbusDriver driver;
+	private static final  Logger LOGGER = Logger.getLogger(ReaderThread.class.getName());
+	private static final  Logger DRIVER_LOGGER = Logger.getLogger("Driver");
 
 	/**
 	 * Create a serial port ReaderThread. 
@@ -77,14 +70,10 @@ public class ReaderThread extends TerminatingThread {
 	 * @param listeners the list of CbusReceiveListeners to be called when a CBUS message is received
 	 * @param log the StyledDocument to be used for logging
 	 */
-	public ReaderThread(JsscSerialCbusDriver driver, SerialPort serialPort, List<CbusReceiveListener> listeners, StyledDocument log) {
+	public ReaderThread(JsscSerialCbusDriver driver, SerialPort serialPort, List<CbusReceiveListener> listeners) {
 		this.serialPort = serialPort;
 		this.listeners = listeners;
-		this.log = log;
 		this.driver = driver;
-		StyleContext sc = StyleContext.getDefaultStyleContext();
-    	redAset = sc.addAttribute(SimpleAttributeSet.EMPTY,
-    	                                        StyleConstants.Foreground, Color.RED);
 	}
 	
 	/**
@@ -94,18 +83,15 @@ public class ReaderThread extends TerminatingThread {
 	public void run() {
 		System.out.println("SerialPort.ReaderThread starting serialport="+serialPort);
 		String input="";
-    	try {
 
-			if (serialPort != null) {
-				if (log != null) log.insertString(0, "READING from "+serialPort.getPortName()+"\n", redAset);
-			} else {
-				if (log != null) log.insertString(0, "READING from nowhere\n", redAset);
-				System.out.println("SerialPort.ReaderThread terminating serialport="+serialPort);
-				return;
-			}
-		} catch (BadLocationException e2) {
-			e2.printStackTrace();
+		if (serialPort != null) {
+			DRIVER_LOGGER.info("READING from "+serialPort.getPortName());
+		} else {
+			DRIVER_LOGGER.info("READING from nowhere");
+			System.out.println("SerialPort.ReaderThread terminating serialport="+serialPort);
+			return;
 		}
+
 		while (!terminate) {			
    			byte[] inb;
 			try {
@@ -147,11 +133,7 @@ public class ReaderThread extends TerminatingThread {
 		System.out.println("SerialPort.ReaderThread terminating serialport="+serialPort);
 		driver.setCommsState(CbusCommsState.DISCONNECTED);
 		if (serialPort != null) {
-			try {
-				if (log != null) log.insertString(0, "TERMINATED READING from "+serialPort.getPortName()+"\n", redAset);
-			} catch (BadLocationException e2) {
-				e2.printStackTrace();
-			}
+			DRIVER_LOGGER.info("TERMINATED READING from "+serialPort.getPortName());
 		}
 	}
 

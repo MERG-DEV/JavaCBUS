@@ -39,18 +39,11 @@
 */
 package co.uk.ccmr.cbus.driver.tcp;
 
-import java.awt.Color;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 import java.util.Set;
-
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyleContext;
-import javax.swing.text.StyledDocument;
+import java.util.logging.Logger;
 
 import co.uk.ccmr.cbus.CbusReceiveListener;
 import co.uk.ccmr.cbus.driver.CbusCommsState;
@@ -68,8 +61,8 @@ public class SocketReader extends Thread  {
 	private InputStream is;
 	private Set<CbusReceiveListener> listeners;
 	private TcpCbusDriver driver;
-	private StyledDocument log;
-	private AttributeSet redAset;
+	private static final  Logger LOGGER = Logger.getLogger(SocketReader.class.getName());
+	private static final  Logger DRIVER_LOGGER = Logger.getLogger("Driver");
 	
 
 	/**
@@ -79,16 +72,10 @@ public class SocketReader extends Thread  {
 	 * @param listeners the CbusReceiveListeners to be notified when a CBUS message is received on the socket
 	 * @throws IOException if there is a communications failure
 	 */
-	public SocketReader(TcpCbusDriver driver, Socket client, Set<CbusReceiveListener> listeners, StyledDocument _log, Options o) throws IOException {
+	public SocketReader(TcpCbusDriver driver, Socket client, Set<CbusReceiveListener> listeners, Options o) throws IOException {
 		is = client.getInputStream();
-		log = _log;	
-
 		this.listeners = listeners;
 		this.driver = driver;
-		StyleContext sc = StyleContext.getDefaultStyleContext();
-    		redAset = sc.addAttribute(SimpleAttributeSet.EMPTY,
-    	                                        StyleConstants.Foreground, Color.RED);
-		
 	}
 
 	/**
@@ -99,12 +86,8 @@ public class SocketReader extends Thread  {
 		byte [] buffer;
 		buffer = new byte[1024];
 
-		try {
-			if (log != null) log.insertString(0, "READING from TCP\n", redAset);
-		} catch (BadLocationException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
-		}
+		DRIVER_LOGGER.info("READING from TCP");
+		
 		while(true) {
 			int cc = 0;
 			try {

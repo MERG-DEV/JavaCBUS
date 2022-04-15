@@ -60,7 +60,7 @@ public interface CbusDriver {
 	 * @param _log the StyledDocument used for logging
 	 * @param o the set of options for this interface
 	 */
-	public void init (int bus, StyledDocument _log, Options o);
+	public void init (int bus, Options o);
 	/**
 	 * Make a connection to the specified port.
 	 *

@@ -39,15 +39,8 @@
 */
 package co.uk.ccmr.cbus.driver.jsscSerial;
 
-import java.awt.Color;
 import java.util.concurrent.BlockingQueue;
-
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyleContext;
-import javax.swing.text.StyledDocument;
+import java.util.logging.Logger;
 
 import jssc.SerialPort;
 import jssc.SerialPortException;
@@ -65,11 +58,11 @@ import co.uk.ccmr.cbus.util.Options;
 public class WriterThread extends TerminatingThread {
 	private SerialPort serialPort;
 	private BlockingQueue<CbusEvent> q;
-	private StyledDocument log;
 	private Options options;
-	private AttributeSet redAset;
-	private AttributeSet yellowAset;
 	private JsscSerialCbusDriver driver;
+	
+	private static final  Logger LOGGER = Logger.getLogger(WriterThread.class.getName());
+	private static final  Logger DRIVER_LOGGER = Logger.getLogger("Driver");
 
 	/**
 	 * Create the WriterThread.
@@ -78,16 +71,10 @@ public class WriterThread extends TerminatingThread {
 	 * @param log the StyledDocument to be used for logging
 	 * @param o the Options
 	 */
-	public WriterThread(JsscSerialCbusDriver driver, SerialPort serialPort, BlockingQueue<CbusEvent> q, StyledDocument log, Options o) {
+	public WriterThread(JsscSerialCbusDriver driver, SerialPort serialPort, BlockingQueue<CbusEvent> q, Options o) {
 		this.serialPort = serialPort;
 		this.q = q;
-		this.log = log;
 		this.driver = driver;
-		StyleContext sc = StyleContext.getDefaultStyleContext();
-    	redAset = sc.addAttribute(SimpleAttributeSet.EMPTY,
-    	                                        StyleConstants.Foreground, Color.red);
-    	yellowAset = sc.addAttribute(SimpleAttributeSet.EMPTY,
-                StyleConstants.Foreground, Color.orange);
 		options = o;
 	}
 	
@@ -97,17 +84,12 @@ public class WriterThread extends TerminatingThread {
 	@Override
 	public void run() {
 		System.out.println("Writer thread running serialport="+serialPort);
-		try {
-			if (serialPort != null) {
-				if (log != null) log.insertString(0, "WRITING to "+serialPort.getPortName()+"\n", redAset);
-				System.out.println("WRITING to "+serialPort.getPortName());
-			} else {
-				if (log != null) log.insertString(0, "WRITING to nowhere\n", redAset);
-				System.out.println("WRITING to nowhere");
-			}
-		} catch (BadLocationException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
+		if (serialPort != null) {
+			DRIVER_LOGGER.info("WRITING to "+serialPort.getPortName());
+			System.out.println("WRITING to "+serialPort.getPortName());
+		} else {
+			DRIVER_LOGGER.info("WRITING to nowhere");
+			System.out.println("WRITING to nowhere");
 		}
 		
 		while (!terminate) {
@@ -117,25 +99,12 @@ public class WriterThread extends TerminatingThread {
 				System.out.println("> "+ce.dump(16));
 				try {
 					if (serialPort == null) {
-						// not connected
-						try {
-							if (log != null) log.insertString(0, "> "+ce.toString()+"\n", yellowAset);
-							if (log != null) log.insertString(0, "> "+ce.dump(options.getBase())+"\n", yellowAset);
-							
-						} catch (BadLocationException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
+						DRIVER_LOGGER.info("> "+ce.toString());
+						DRIVER_LOGGER.info("> "+ce.dump(options.getBase()));
 					} else {
 						// not connected
-						try {
-							if (log != null) log.insertString(0, "> "+ce.toString()+"\n", null);
-							if (log != null) log.insertString(0, "> "+ce.dump(options.getBase())+"\n", null);
-							
-						} catch (BadLocationException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
+						DRIVER_LOGGER.info("> "+ce.toString());
+						DRIVER_LOGGER.info("> "+ce.dump(options.getBase()));
 						serialPort.writeString(ce.toString());
 					}
 				} catch (SerialPortException e) {
@@ -155,12 +124,7 @@ public class WriterThread extends TerminatingThread {
 		driver.setCommsState(CbusCommsState.DISCONNECTED);
 		terminate = true;
 		if (serialPort != null) {
-			try {
-				if (log != null) log.insertString(0, "TERMINATED WRITING to "+serialPort.getPortName()+"\n", redAset);
-			} catch (BadLocationException e2) {
-				// TODO Auto-generated catch block
-				e2.printStackTrace();
-			}
+			DRIVER_LOGGER.info("TERMINATED WRITING to "+serialPort.getPortName());
 		}
 	}
 }

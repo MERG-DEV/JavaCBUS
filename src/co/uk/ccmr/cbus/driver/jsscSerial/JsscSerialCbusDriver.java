@@ -39,20 +39,13 @@
 */
 package co.uk.ccmr.cbus.driver.jsscSerial;
 
-import java.awt.Color;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
-
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyleContext;
-import javax.swing.text.StyledDocument;
+import java.util.logging.Logger;
 
 import jssc.SerialPort;
 import jssc.SerialPortEvent;
@@ -77,14 +70,14 @@ import co.uk.ccmr.cbus.util.Options;
 public class JsscSerialCbusDriver implements SerialPortEventListener, CbusDriver {
 	private BlockingQueue<CbusEvent> writeQueue;
 	private SerialPort serialPort;
-	private StyledDocument log;
 	private ReaderThread reader;
 	private WriterThread writer;
 	private List<CbusReceiveListener> listeners;
 	private Options options;
-	private AttributeSet redAset;
 	private CbusCommsState cbusCommsState;
 	private Set<CbusCommsStateListener> commsStateListeners;
+	private static final  Logger LOGGER = Logger.getLogger(ReaderThread.class.getName());
+	private static final  Logger DRIVER_LOGGER = Logger.getLogger("Driver");
 	
 	/**
 	 * Creates the serial port driver.
@@ -94,9 +87,6 @@ public class JsscSerialCbusDriver implements SerialPortEventListener, CbusDriver
 		commsStateListeners = new HashSet<CbusCommsStateListener>();
 		writeQueue = new LinkedBlockingQueue<CbusEvent>();
 		listeners = new CopyOnWriteArrayList<CbusReceiveListener>();
-		StyleContext sc = StyleContext.getDefaultStyleContext();
-    	redAset = sc.addAttribute(SimpleAttributeSet.EMPTY,
-    	                                        StyleConstants.Foreground, Color.red);
 	}
 	
 	/**
@@ -106,13 +96,12 @@ public class JsscSerialCbusDriver implements SerialPortEventListener, CbusDriver
 	 * @param _log the StyledDocument to be used for logging
 	 * @param o the options
 	 */
-	public void init (int bus, StyledDocument _log, Options o) {
+	public void init (int bus, Options o) {
 		options = o;
-		log = _log;
 		// create the threads
-		reader = new ReaderThread(this, serialPort, listeners, log);
+		reader = new ReaderThread(this, serialPort, listeners);
 		reader.start();
-		writer = new WriterThread(this, serialPort, writeQueue, log, options);
+		writer = new WriterThread(this, serialPort, writeQueue, options);
 		writer.start();
 	}
 	
@@ -143,11 +132,8 @@ public class JsscSerialCbusDriver implements SerialPortEventListener, CbusDriver
 			writer.interrupt();
 			writer = null;
 		}
-		try {
-			if (log != null) log.insertString(0, "Opening port "+portName+"\n", redAset);
-		} catch (BadLocationException e2) {
-			e2.printStackTrace();
-		}
+		DRIVER_LOGGER.info("Opening port "+portName);
+
 		serialPort = new SerialPort(portName);	
 
 		try {
@@ -166,9 +152,9 @@ public class JsscSerialCbusDriver implements SerialPortEventListener, CbusDriver
 		}
  
 		// create the threads
-		reader = new ReaderThread(this, serialPort, listeners, log);
+		reader = new ReaderThread(this, serialPort, listeners);
 		reader.start();
-		writer = new WriterThread(this, serialPort, writeQueue, log, options);
+		writer = new WriterThread(this, serialPort, writeQueue, options);
 		writer.start();
 		setCommsState(CbusCommsState.CONNECTED);
 	}
@@ -238,11 +224,7 @@ public class JsscSerialCbusDriver implements SerialPortEventListener, CbusDriver
 	@Override
     public void serialEvent(SerialPortEvent event) {
         String err = "EVENT:"+eventTypeToString(event.getEventType())+" Value="+event.getEventValue();
-        try {
-        	if (log != null) log.insertString(0, "> "+err+"\n", redAset);
-		} catch (BadLocationException e) {
-			e.printStackTrace();
-		}
+        DRIVER_LOGGER.info("> "+err);
     }
 	
 	/**

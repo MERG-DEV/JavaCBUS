@@ -39,7 +39,6 @@
 */
 package co.uk.ccmr.cbus.driver.tcp;
 
-import java.awt.Color;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetAddress;
@@ -47,19 +46,14 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.HashSet;
 import java.util.Set;
-
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyleContext;
-import javax.swing.text.StyledDocument;
+import java.util.logging.Logger;
 
 import co.uk.ccmr.cbus.CbusReceiveListener;
 import co.uk.ccmr.cbus.driver.CbusCommsState;
 import co.uk.ccmr.cbus.driver.CbusCommsStateListener;
 import co.uk.ccmr.cbus.driver.CbusDriver;
 import co.uk.ccmr.cbus.driver.CbusDriverException;
+import co.uk.ccmr.cbus.driver.jsscSerial.ReaderThread;
 import co.uk.ccmr.cbus.sniffer.CbusEvent;
 import co.uk.ccmr.cbus.util.Options;
 
@@ -81,9 +75,8 @@ public class TcpCbusDriver implements CbusDriver {
 	private CbusCommsState cbusCommsState;
 	private HashSet<CbusCommsStateListener> commsStateListeners;
 	private SocketReader reader;
-	private StyledDocument log;
-	private AttributeSet redAset;
-	private AttributeSet yellowAset;
+	private static final  Logger LOGGER = Logger.getLogger(ReaderThread.class.getName());
+	private static final  Logger DRIVER_LOGGER = Logger.getLogger("Driver");
 	
 	
 	/**
@@ -93,13 +86,7 @@ public class TcpCbusDriver implements CbusDriver {
 		port = DEFAULT_PORT;
 		cbusCommsState = CbusCommsState.DISCONNECTED;
 		listeners = new HashSet<CbusReceiveListener>();
-		commsStateListeners = new HashSet<CbusCommsStateListener>();
-		StyleContext sc = StyleContext.getDefaultStyleContext();
-	    redAset = sc.addAttribute(SimpleAttributeSet.EMPTY,
-    	                                        StyleConstants.Foreground, Color.red);
-	    yellowAset = sc.addAttribute(SimpleAttributeSet.EMPTY,
-                    StyleConstants.Foreground, Color.orange);
-		
+		commsStateListeners = new HashSet<CbusCommsStateListener>();		
 	}
 	
 	/**
@@ -110,9 +97,8 @@ public class TcpCbusDriver implements CbusDriver {
 	 * @o the options
 	 */
 	@Override
-	public void init(int bus, StyledDocument _log, Options o) {
+	public void init(int bus, Options o) {
 		options = o;
-		log = _log;
 	}
 
 	/**
@@ -142,12 +128,7 @@ public class TcpCbusDriver implements CbusDriver {
 				throw new CbusDriverException(e);
 			}
 		}
-		try {
-			if (log != null) log.insertString(0, "Opening port "+portName+"\n", redAset);
-		} catch (BadLocationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		DRIVER_LOGGER.info("Opening port "+portName);
 		
 		try {
 			client = new Socket(ip, port);
@@ -166,19 +147,13 @@ public class TcpCbusDriver implements CbusDriver {
 		System.out.println("Socket connected to:"+portName);
 		// create the reader Thread
 		try {
-			reader = new SocketReader(this, client, listeners, log, options);
+			reader = new SocketReader(this, client, listeners, options);
 		} catch (IOException e) {
 			throw new CbusDriverException(e);
 		}
 		reader.start();
 		setCbusCommsState(CbusCommsState.CONNECTED);
-		try {
-			if (log != null) log.insertString(0, "Connectted to "+portName+"\n", redAset);
-		} catch (BadLocationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
+		DRIVER_LOGGER.info("Connectted to "+portName);
 	}
 
 	/**
@@ -199,13 +174,7 @@ public class TcpCbusDriver implements CbusDriver {
 			}
 		}
 		setCbusCommsState(CbusCommsState.DISCONNECTED);
-		try {
-			if (log != null) log.insertString(0, "Disconnected TCP client connection\n", redAset);
-		} catch (BadLocationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
+		DRIVER_LOGGER.info("Disconnected TCP client connection");		
 	}
 
 	/**
@@ -238,24 +207,13 @@ public class TcpCbusDriver implements CbusDriver {
 		System.out.println("TCP> "+ce.toString());
 		System.out.println("TCP> "+ce.dump(16));
 		if (getCbusCommsState() != CbusCommsState.CONNECTED) {
-			try {
-				if (log != null) log.insertString(0, "> "+ce.toString()+"\n", yellowAset);
-				if (log != null) log.insertString(0, "> "+ce.dump(options.getBase())+"\n", yellowAset);
-			} catch (BadLocationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			DRIVER_LOGGER.info("> "+ce.toString());
+			DRIVER_LOGGER.info("> "+ce.dump(options.getBase()));
 			return;
 		}
 		try {
-			try {
-				if (log != null) log.insertString(0, "> "+ce.toString()+"\n", null);
-				if (log != null) log.insertString(0, "> "+ce.dump(options.getBase())+"\n", null);	
-			} catch (BadLocationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
+			DRIVER_LOGGER.info("> "+ce.toString());
+			DRIVER_LOGGER.info("> "+ce.dump(options.getBase()));			
 			os.write(ce.toString().getBytes());
 		} catch (IOException e) {
 			e.printStackTrace();
