@@ -39,7 +39,9 @@
 */
 package co.uk.ccmr.cbus.driver.fazecastSerial;
 
+import java.awt.Color;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.text.StyleContext;
@@ -99,7 +101,7 @@ public class ReaderThread extends TerminatingThread {
    			byte[] inb = new byte[1];
    			int cc = serialPort.readBytes(inb, 1);
    			if (cc != 1){
-   				DRIVER_LOGGER.info("Error reading from Serial Port "+serialPort.getSystemPortName());
+   				DRIVER_LOGGER.log(Level.INFO, "Error reading from Serial Port "+serialPort.getSystemPortName(), Color.RED);
    				break;
    			}
    			if (cc == 0) {
@@ -126,7 +128,7 @@ public class ReaderThread extends TerminatingThread {
    					for (CbusReceiveListener ml : listeners) {
    						ml.receiveMessage(ce);
    					}
-   					System.out.println("< "+ce.dump(16));
+   					DRIVER_LOGGER.log(Level.INFO, "< "+ce.dump(16), Color.GREEN);
    				} catch (InvalidEventException e) {
    					System.err.println("input="+input);
    					e.printStackTrace();
@@ -140,7 +142,7 @@ public class ReaderThread extends TerminatingThread {
 		System.out.println("SerialPort.ReaderThread terminating serialport="+serialPort);
 		driver.setCommsState(CbusCommsState.DISCONNECTED);
 		if (serialPort != null) {
-			DRIVER_LOGGER.info("TERMINATED READING from "+serialPort.getSystemPortName());
+			DRIVER_LOGGER.log(Level.INFO, "TERMINATED READING from "+serialPort.getSystemPortName(), Color.RED);
 		}
 	}
 

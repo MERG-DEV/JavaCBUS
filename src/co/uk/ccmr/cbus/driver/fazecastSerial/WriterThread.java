@@ -39,7 +39,9 @@
 */
 package co.uk.ccmr.cbus.driver.fazecastSerial;
 
+import java.awt.Color;
 import java.util.concurrent.BlockingQueue;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.fazecast.jSerialComm.SerialPort;
@@ -84,10 +86,10 @@ public class WriterThread extends TerminatingThread {
 	public void run() {
 		System.out.println("Writer thread running serialport="+serialPort);
 		if (serialPort != null) {
-			DRIVER_LOGGER.info("WRITING to "+serialPort.getSystemPortName());
+			DRIVER_LOGGER.log(Level.INFO, "WRITING to "+serialPort.getSystemPortName(), Color.RED);
 			System.out.println("WRITING to "+serialPort.getSystemPortName());
 		} else {
-			DRIVER_LOGGER.info("WRITING to nowhere");
+			DRIVER_LOGGER.log(Level.INFO, "WRITING to nowhere", Color.RED);
 			System.out.println("WRITING to nowhere");
 		}
 	
@@ -99,12 +101,12 @@ public class WriterThread extends TerminatingThread {
 				System.out.println("> "+ce.dump(16));
 				if (serialPort == null) {
 					// not connected
-					DRIVER_LOGGER.info("> "+ce.toString());
-					DRIVER_LOGGER.info("> "+ce.dump(options.getBase()));
+					DRIVER_LOGGER.log(Level.INFO, "> "+ce.toString(), Color.ORANGE);
+					DRIVER_LOGGER.log(Level.INFO, "> "+ce.dump(options.getBase()), Color.ORANGE);
 				} else {
 					// connected
-					DRIVER_LOGGER.info("> "+ce.toString());
-					DRIVER_LOGGER.info("> "+ce.dump(options.getBase()));
+					DRIVER_LOGGER.log(Level.INFO, "> "+ce.toString());
+					DRIVER_LOGGER.log(Level.INFO, "> "+ce.dump(options.getBase()));
 					byte[] bytes = ce.toString().getBytes();
 					serialPort.writeBytes(bytes, bytes.length);
 				}
@@ -120,7 +122,7 @@ public class WriterThread extends TerminatingThread {
 		driver.setCommsState(CbusCommsState.DISCONNECTED);
 		terminate = true;
 		if (serialPort != null) {
-			DRIVER_LOGGER.info("TERMINATED WRITING to "+serialPort.getSystemPortName());
+			DRIVER_LOGGER.log(Level.INFO, "TERMINATED WRITING to "+serialPort.getSystemPortName(), Color.RED);
 		}
 	}
 }

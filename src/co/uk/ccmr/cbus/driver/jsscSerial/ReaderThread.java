@@ -39,7 +39,9 @@
 */
 package co.uk.ccmr.cbus.driver.jsscSerial;
 
+import java.awt.Color;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import co.uk.ccmr.cbus.CbusReceiveListener;
@@ -111,6 +113,7 @@ public class ReaderThread extends TerminatingThread {
    							ml.receiveMessage(ce);
    						}
    						System.out.println("< "+ce.dump(16));
+   						DRIVER_LOGGER.log(Level.INFO,"< "+ce.dump(16), Color.GREEN);
    					} catch (InvalidEventException e) {
    						System.err.println("input="+input);
    						e.printStackTrace();
@@ -133,7 +136,7 @@ public class ReaderThread extends TerminatingThread {
 		System.out.println("SerialPort.ReaderThread terminating serialport="+serialPort);
 		driver.setCommsState(CbusCommsState.DISCONNECTED);
 		if (serialPort != null) {
-			DRIVER_LOGGER.info("TERMINATED READING from "+serialPort.getPortName());
+			DRIVER_LOGGER.log(Level.INFO, "TERMINATED READING from "+serialPort.getPortName(), Color.RED);
 		}
 	}
 

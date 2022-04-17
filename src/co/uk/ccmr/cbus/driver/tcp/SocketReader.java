@@ -39,10 +39,12 @@
 */
 package co.uk.ccmr.cbus.driver.tcp;
 
+import java.awt.Color;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import co.uk.ccmr.cbus.CbusReceiveListener;
@@ -103,11 +105,13 @@ public class SocketReader extends Thread  {
 			} catch (InvalidEventException e) {
 				e.printStackTrace();
 			}
+			DRIVER_LOGGER.log(Level.INFO, "<"+ce.dump(16), Color.GREEN);
 			for (CbusReceiveListener l : listeners) {
 				l.receiveMessage(ce);
 			}
 		}
 		driver.setCbusCommsState(CbusCommsState.DISCONNECTED);
+		DRIVER_LOGGER.log(Level.INFO, "Disconnected", Color.RED);
 	}
 
 	public int getQueueSize() {
